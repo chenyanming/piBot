@@ -176,7 +176,7 @@ def on_chat_message(msg):
                        # [InlineKeyboardButton(text='News', callback_data='News')],
                        [InlineKeyboardButton(text='Recently Added Books', callback_data='Calibre_New')],
                        ])
-        telegram_bot.sendMessage(chat_id, 
+        telegram_bot.sendMessage(chat_id,
             '*Functions*\n' +
             '[Youtube m4a downlaod](https://www.youtube.com/) - Send a youtube link to Pibot, Pibot downloads the music and send back the sound file (Up to 50MB)\n'+
             '[Aria2 BT download](https://hkvim.com) - Send a BT file to Pibot to trigger the server download\n' +
@@ -210,7 +210,7 @@ def on_chat_message(msg):
 
     elif command == '/mode' or command =='#mode':
         if pythonModeEnable == True:
-            telegram_bot.sendMessage(chat_id, 'Python Mode is: ON', parse_mode="Markdown") 
+            telegram_bot.sendMessage(chat_id, 'Python Mode is: ON', parse_mode="Markdown")
 
         if shellModeEnable == True:
             telegram_bot.sendMessage(chat_id, 'Shell Mode is: ON', parse_mode="Markdown")
@@ -221,7 +221,7 @@ def on_chat_message(msg):
         if re.search(r'(?<=/mode )(.*)|(?<=#mode )(.*)', command).group() == 'python':
             pythonModeEnable = True
             shellModeEnable = False
-            telegram_bot.sendMessage(chat_id, 'Python Mode is: ON', parse_mode="Markdown") 
+            telegram_bot.sendMessage(chat_id, 'Python Mode is: ON', parse_mode="Markdown")
             # telegram_bot.sendMessage(chat_id, 'Deleting keyboard', reply_markup=ReplyKeyboardRemove())
             telegram_bot.sendMessage(chat_id, 'Python Keyboarad is On',
                     # reply_markup=ReplyKeyboardMarkup(
@@ -275,7 +275,7 @@ def on_chat_message(msg):
             pythonMode.expect('>>>')
             if str(pythonMode.before[len(command)+3:]) != '': # if the output is not empty, normally it is import command
                 telegram_bot.sendMessage(chat_id, str(pythonMode.before[len(command)+3:] )) #Return the output
-            
+
         except Exception as e:
             telegram_bot.sendMessage(chat_id, 'python mode command Error:\n' + str(e))
         return
@@ -286,8 +286,8 @@ def on_chat_message(msg):
         # 1. Youtube m4a downlaod
         # Usage: forward a youtube link to Pibot, Pibot downloads the music and send back the sound file
         # Limit: up to 50 MB
-        # 
-        if re.match('https://www.youtube.com.*|https://youtu.be.*',command):
+        #
+        if re.match('https://www.youtube.com.*|https://youtu.be.*|https://music.youtube.com.*',command):
             try:
                 # telegram_bot.sendMessage(chat_id, str('*' + get_exitcode_stdout_stderr('youtube-dl --extract-audio --audio-format mp3 ' + command) + '*'), parse_mode="Markdown") #Return the output
                 # telegram_bot.sendMessage(chat_id, str('*' + get_exitcode_stdout_stderr('youtube-dl -f bestaudio[ext=m4a] --embed-thumbnail --add-metadata -o "%(title)s.%(ext)s" ' + command) + '*'), parse_mode="Markdown") #Return the output
@@ -306,17 +306,17 @@ def on_chat_message(msg):
         #
         # 2. Youtube video downlaod
         # Usage: input "/youtube video_url"
-        # 
-        elif re.match('/youtube .*|#youtube .*',command):
+        #
+        elif re.match('/y .*|#y .*',command):
             try:
                 # get_exitcode_stdout_stderr('youtube-dl ' + command)
-                telegram_bot.sendMessage(chat_id, str('*' + get_exitcode_stdout_stderr('youtube-dl -o "/media/pi/ShareDrive/Download/%(title)s.%(ext)s" ' + re.search('https://.*', command).group()) + '*'), parse_mode="Markdown") #Return the output
+                sendMessageAdvanced(chat_id, get_exitcode_stdout_stderr('youtube-dl --no-progress --write-sub --write-auto-sub --sub-lang "en,ja,zh-Hans,zh-Hant" -o "/media/pi/ShareDrive/Download/%(title)s.%(ext)s" ' + re.search('https://.*', command).group()))
             except Exception as e:
                 telegram_bot.sendMessage(chat_id, 'Youtube-dl video Error:\n' + str(e))
         #
         # 3. Aria2 download
         # Usage: input "/download http|magnet..."
-        # 
+        #
         elif re.match('/download .*|#download .*',command):
             try:
                 telegram_bot.sendMessage(chat_id, str('*' + get_exitcode_stdout_stderr('python /home/pi/Documents/aria2rpc/aria2rpc.py --cookie "id=xxx; name=yyy;" --dir /media/pi/ShareDrive/Download --rpc http://127.0.0.1:6800/jsonrpc ' + re.search('http.*|magnet.*', command).group()) + '*'), parse_mode="Markdown") #Return the output
@@ -329,7 +329,7 @@ def on_chat_message(msg):
         # 4. Aria2 BT download / Ebook backup
         # Usage: send a BT file to Pibot to trigger the server download; send a pdf/mobi/epub/azw3 file to Pibot to backup the ebook to calibre library
         # Limit: up to 20MB
-        # 
+        #
         elif content_type == 'document':
             ebookName = slugify(msg['document']['file_name'], True)
             # now = str(datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S')) + '.pdf'
@@ -361,7 +361,7 @@ def on_chat_message(msg):
                 except Exception as e:
                     telegram_bot.sendMessage(chat_id, 'EPUB upload Error:\n' + str(e))
             else:
-                telegram_bot.sendMessage(chat_id, str('*This type of file ' + msg['document']['mime_type'] + ' is not supported.*'), parse_mode="Markdown") 
+                telegram_bot.sendMessage(chat_id, str('*This type of file ' + msg['document']['mime_type'] + ' is not supported.*'), parse_mode="Markdown")
 
 
         elif content_type == 'photo':
@@ -373,7 +373,7 @@ def on_chat_message(msg):
         #
         # 5. Calibre search
         # Usage: input "/booksearch word"
-        # 
+        #
         elif re.match('/booksearch .*|#booksearch .*',command):
             try:
                 # search the characters after 'booksearch '
@@ -384,7 +384,7 @@ def on_chat_message(msg):
         #
         # 6. Calibre show
         # Usage: input "/bookshow id"
-        # 
+        #
         elif re.match('/bookshow .*|#bookshow .*',command):
             try:
                 # search the characters after 'booksearch '
@@ -395,7 +395,7 @@ def on_chat_message(msg):
         #
         # 7. Calibre export
         # Usage: input "/bookexport id"
-        # 
+        #
         elif re.match('/bookexport .*|#bookexport .*',command):
             try:
                 # search the characters after 'booksearch '
@@ -409,7 +409,7 @@ def on_chat_message(msg):
         #
         # 8. Convert int to hex
         # Usage: input "/hex decimal number"
-        # 
+        #
         # elif re.match('/hex .*|#hex .*',command):
         #     try:
         #         # search the characters after 'booksearch '
@@ -420,7 +420,7 @@ def on_chat_message(msg):
         #
         # 9. Convert hex to int
         # Usage: input "/int hex number"
-        # 
+        #
         # elif re.match('/int .*|#int .*',command):
         #     try:
         #         # search the characters after 'booksearch '
@@ -431,7 +431,7 @@ def on_chat_message(msg):
         #
         # 10. Convert hkd to cny, usd
         # Usage: input "/hkd number"
-        # 
+        #
         elif re.match('/hkd .*|#hkd .*',command):
             try:
                 # search the characters after 'booksearch '
@@ -443,7 +443,7 @@ def on_chat_message(msg):
         #
         # 11. Convert cny to hkd, usd
         # Usage: input "/cny number"
-        # 
+        #
         elif re.match('/cny .*|#cny .*',command):
             try:
                 # search the characters after 'booksearch '
@@ -455,7 +455,7 @@ def on_chat_message(msg):
         #
         # 12. Convert usd to hkd, cny
         # Usage: input "/cny number"
-        # 
+        #
         elif re.match('/usd .*|#usd .*',command):
             try:
                 # search the characters after 'booksearch '
@@ -467,7 +467,7 @@ def on_chat_message(msg):
         #
         # 12. Convert jpy to hkd, cny
         # Usage: input "/jpy number"
-        # 
+        #
         elif re.match('/jpy .*|#jpy .*',command):
             try:
                 # search the characters after 'booksearch '
@@ -479,7 +479,7 @@ def on_chat_message(msg):
         #
         # 13. Calculator
         # Usage: input "/cal equation or equation directly"
-        # 
+        #
         # elif re.match(r'(/cal.*)|(#cal.*)|(^[0-9].*)|([\(].*)',command):
         elif re.match(r'^[0-9].*',command):
             try:
@@ -506,13 +506,13 @@ def on_chat_message(msg):
                 pythonMode.sendline(realCommand)
                 pythonMode.expect('>>>')
                 telegram_bot.sendMessage(chat_id, str(str(pythonMode.before[len(realCommand)+3:]) )) #Return the output
-                
+
             except Exception as e:
                 telegram_bot.sendMessage(chat_id, 'cal command Error:\n' + str(e))
         #
-        # 14. Duck duck go search 
+        # 14. Duck duck go search
         # Usage: input "/search keyword"
-        # 
+        #
         elif re.match('/search .*|#search .*',command):
             try:
                 output = ''
@@ -525,11 +525,11 @@ def on_chat_message(msg):
 
             except Exception as e:
                 telegram_bot.sendMessage(chat_id, 'search command Error:\n' + str(e))
-                
+
         #
         # 15. Duck duck go search and preview
         # Usage: input "/search keyword"
-        # 
+        #
         elif re.match('/preview .*|#preview .*',command):
             try:
                 output = ''
@@ -545,7 +545,7 @@ def on_chat_message(msg):
         #
         # *. Normal command
         # Usage: send a message to Pibot, pibot will take it as a normal command and issue it. If you send it the python source codes, it will run it!
-        # 
+        #
         else:
             # Input the command
             try:
@@ -652,7 +652,7 @@ def on_chosen_inline_result(msg):
 telegram_bot = telepot.Bot('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 # print(telegram_bot.getMe())
 logging.info(telegram_bot.getMe())
-telegram_bot.sendMessage(888888888, str('*Pi03 Started.*'), parse_mode="Markdown")
+telegram_bot.sendMessage(896631342, str('*Pi03 Started.*'), parse_mode="Markdown")
 answerer = telepot.helper.Answerer(telegram_bot)
 
 # MessageLoop(telegram_bot, action).run_as_thread()
@@ -662,5 +662,3 @@ MessageLoop(telegram_bot, {'chat': on_chat_message, 'callback_query': on_callbac
 
 while 1:
 	time.sleep(10)
-
-
